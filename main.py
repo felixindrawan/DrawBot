@@ -1,8 +1,13 @@
 # bot.py
 import os
 import random
+import shutil
+import uuid
+
 import discord
+import requests as requests
 from dotenv import load_dotenv
+
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
 GUILD = os.getenv('GUILD')
@@ -29,6 +34,21 @@ async def on_ready():
     members = '\n - '.join([member.name for member in guild.members])
     print(f'Guild Members:\n - {members}')
     # print(guild.members)
+
+@client.event
+async def save_img (ctx):
+    try:
+        url = ctx.message.attachments[0].url
+    except IndexError:
+        print("Error: No Attachment")
+        await ctx.send("No atachment detected")
+    else:
+        if url[0:26] == "https://cdn.discordapp.com":
+            r = requests.get(url, stream=True)
+            imageName = str(uuid.uuid4()) + '.png'
+            with open (imageName, 'wb') as out_file:
+                print('Saving image: ' + imageName)
+                shutil.copyfileobj(r.raw, out_file)
 
 @client.event
 async def on_message(message):
