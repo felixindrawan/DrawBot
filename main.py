@@ -48,8 +48,9 @@ class ExistingId:
     def set_extId(self, new_val):
         self.existId = new_val
 
-    def get_extId(self):
+    def get_extUser(self):
         return self.existId
+
 existing_ids = ExistingId([])
 
 class FileSubmissions:
@@ -86,8 +87,7 @@ async def submit(ctx):
   if currentProgress.get_progress():
     id = ctx.message.author.id
     mention = ctx.message.author.mention
-    if id in existing_ids.get_extId(): await ctx.send("Cannot submit more than once! " + str(mention))
-    # elif IN_PROGRESS==False: await ctx.send("Game hasn't started, not submitted. " + str(mention))
+    if [id, mention] in existing_ids.get_extIds(): await ctx.send("Cannot submit more than once! " + str(mention))
     else:
         try:
             url = ctx.message.attachments[0].url            # check for an image, call exception if none found
@@ -106,7 +106,7 @@ async def submit(ctx):
                     print('Saving image: ' + imageName)
                     shutil.copyfileobj(r.raw, out_file)     # save image (goes to project directory)  TODO save images to designated directory with their username!
                 await ctx.send('Submitted by '+ str(mention) + ' !')
-                existing_ids.add_extId(id)
+                existing_ids.add_extId(id,mention)
   else:
       await ctx.send('Submission is currently closed.')
 
@@ -128,8 +128,10 @@ async def start(ctx, time):
     currentProgress.set_progress(False);
     await ctx.send("Time is up!")
     # compare all the images with ai probability. The highest probability wins
-    ids = existing_ids.get_extId()
-    for id in ids:
+    users = existing_ids.get_extIds()
+    for i in range(len(users)):
+        id = users[i][0]
+        mention = users[i][1]
         ret = Prediction.Predict(str(id)+".png")
         print(ret)
         label = ret[0]
