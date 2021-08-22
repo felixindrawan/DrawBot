@@ -32,11 +32,11 @@ def Predict(file):
     max_index, max_value = max(enumerate(new_cnn_predict[0]), key=operator.itemgetter(1))
     label_dict = {0: 'arm', 1: 'bicycle', 2: 'book', 3: 'paper_clip'}
     print(file + ": The drawing is identified as --> ", label_dict[max_index], " <-- with a probability of ", max_value * 100)
-    return {label_dict[max_index], max_value}
+    return [label_dict[max_index], max_value]
 
 # for i in list(range(1)):
 #     # plot probabilities:
-#     ax = plt.subplot2grid((1, 5), (i, 0), colspan=4);
+#     ax = plt.subplot2grid((1, 5), (i, 0), colspan=4 );
 #     plt.bar(np.arange(4), new_cnn_predict[i], 0.35, align='center');
 #     plt.xticks(np.arange(4), ['arm', 'bicycle', 'book', 'paper_clip'])
 #     plt.tick_params(axis='x', bottom='off', top='off')

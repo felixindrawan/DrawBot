@@ -3,6 +3,7 @@ import os
 import asyncio
 import random
 from discord.ext import commands
+from discord.utils import get
 import uuid
 import requests
 import shutil
@@ -41,8 +42,8 @@ class ExistingId:
     def __init__(self, existId):
         self.existId = existId
 
-    def add_extId(self, new_val):
-        self.existId.append(new_val)
+    def add_extId(self, new_val, new_mention):
+        self.existId.append([new_val, new_mention])
 
     def set_extId(self, new_val):
         self.existId = new_val
@@ -66,7 +67,7 @@ class FileSubmissions:
 submittedFiles = FileSubmissions([])
 
 class DrawingScores:
-    def __init(self, scores):
+    def __init__(self, scores):
         self.scores = scores
     def add_score(self,score):
         self.scores.append(score)
@@ -129,11 +130,15 @@ async def start(ctx, time):
     # compare all the images with ai probability. The highest probability wins
     ids = existing_ids.get_extId()
     for id in ids:
-        ret = Prediction.Predict(id+".png")
+        ret = Prediction.Predict(str(id)+".png")
+        print(ret)
         label = ret[0]
         prob = ret[1]
-        user = bot.get_user(id)
-        await ctx.send(user+": your drawing is "+ prob*100 +"% "+ label)
+        user = get(bot.get_all_members(), id=id)
+        print(user)
+        probability = prob*100
+        strProb =  ": Your drawing is {probability: .2f}% paper_clip".format(probability=probability)
+        await ctx.send(strProb)
     # clear directory
     existing_ids.set_extId([])
 
