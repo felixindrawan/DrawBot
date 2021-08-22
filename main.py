@@ -85,6 +85,7 @@ async def submit(ctx):
                 r = requests.get(url, stream=True)
                 # imageName = str(uuid.uuid4()) + '.jpg'      # uuid creates random unique id to use for image names
                 imageName = str(id) + '.png'
+                submittedFiles.add_files(imageName)
                 if not os.path.exists('submissions'):
                     os.makedirs('submissions')
                 with open('submissions/' + imageName, 'wb') as out_file:
@@ -102,6 +103,7 @@ async def start(ctx, time):
     if os.path.exists('submissions'):
         shutil.rmtree('submissions/', ignore_errors=False, onerror=None)
     existing_ids.set_extId([])
+    submittedFiles.set_files([])
     currentProgress.set_progress(True);
     await ctx.send("The prompt is: "+ prompt)
     await asyncio.sleep(int(time))
@@ -110,5 +112,7 @@ async def start(ctx, time):
     # compare all the images with ai probability. The highest probability wins
     # clear directory
     existing_ids.set_extId([])
+    print(submittedFiles.get_files())
+
 
 bot.run(TOKEN)
