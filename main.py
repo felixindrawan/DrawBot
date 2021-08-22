@@ -49,6 +49,20 @@ class ExistingId:
         return self.existId
 existing_ids = ExistingId([])
 
+class FileSubmissions:
+    def __init__(self, files):
+        self.files = files
+
+    def add_files(self, new_val):
+        self.files.append(new_val)
+
+    def set_files(self, new_val):
+        self.files = new_val
+
+    def get_files(self):
+        return self.files
+submittedFiles = FileSubmissions([])
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
@@ -70,7 +84,7 @@ async def submit(ctx):
             if url[0:26] == "https://cdn.discordapp.com" or url[0:28] == "https://media.discordapp.net":   # look to see if url is from discord
                 r = requests.get(url, stream=True)
                 # imageName = str(uuid.uuid4()) + '.jpg'      # uuid creates random unique id to use for image names
-                imageName = str(id) + '.jpg'
+                imageName = str(id) + '.png'
                 if not os.path.exists('submissions'):
                     os.makedirs('submissions')
                 with open('submissions/' + imageName, 'wb') as out_file:
@@ -85,6 +99,8 @@ async def submit(ctx):
 @bot.command(name='start', help='Starts a random prompt for drawing. Use: .start <time in seconds for challenge')
 async def start(ctx, time):
     prompt = random.choice(PROMPTS)
+    if os.path.exists('submissions'):
+        shutil.rmtree('submissions/', ignore_errors=False, onerror=None)
     existing_ids.set_extId([])
     currentProgress.set_progress(True);
     await ctx.send("The prompt is: "+ prompt)
@@ -94,6 +110,5 @@ async def start(ctx, time):
     # compare all the images with ai probability. The highest probability wins
     # clear directory
     existing_ids.set_extId([])
-    shutil.rmtree('submissions/', ignore_errors=False, onerror=None)
 
 bot.run(TOKEN)
