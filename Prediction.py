@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 #  TODO REFERENCE
 def Predict(file):
-    img = cv2.imread(file, 0)
+    img = cv2.imread("submissions/" + file, 0)
     # ret,thresh1 = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
     img = cv2.resize(img, (28, 28))
     plt.imshow((img.reshape((28, 28))), cmap='gray_r')
@@ -31,8 +31,8 @@ def Predict(file):
     # Finding the max probability
     max_index, max_value = max(enumerate(new_cnn_predict[0]), key=operator.itemgetter(1))
     label_dict = {0: 'arm', 1: 'bicycle', 2: 'book', 3: 'paper_clip'}
-    print("The drawing is identified as --> ", label_dict[max_index], " <-- with a probability of ", max_value * 100)
-    return max_value
+    print(file + ": The drawing is identified as --> ", label_dict[max_index], " <-- with a probability of ", max_value * 100)
+    return {label_dict[max_index], max_value}
 
 # for i in list(range(1)):
 #     # plot probabilities:

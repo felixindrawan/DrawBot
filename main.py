@@ -7,6 +7,8 @@ import uuid
 import requests
 import shutil
 # import the ai algorithm
+import Prediction
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -63,6 +65,9 @@ class FileSubmissions:
         return self.files
 submittedFiles = FileSubmissions([])
 
+class DrawingScores:
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} connected!')
@@ -99,6 +104,10 @@ async def submit(ctx):
 
 @bot.command(name='start', help='Starts a random prompt for drawing. Use: .start <time in seconds for challenge')
 async def start(ctx, time):
+    if (currentProgress.get_progress()):
+        await ctx.send('There is a quiz currently going on')
+        return
+
     prompt = random.choice(PROMPTS)
     if os.path.exists('submissions'):
         shutil.rmtree('submissions/', ignore_errors=False, onerror=None)
@@ -113,6 +122,11 @@ async def start(ctx, time):
     # clear directory
     existing_ids.set_extId([])
     print(submittedFiles.get_files())
+
+    userSubmission = submittedFiles.get_files()
+    if (userSubmission != []):
+        for files in userSubmission:
+            Prediction.Predict(files)
 
 
 bot.run(TOKEN)
