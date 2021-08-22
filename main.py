@@ -87,7 +87,7 @@ async def submit(ctx):
   if currentProgress.get_progress():
     id = ctx.message.author.id
     mention = ctx.message.author.mention
-    if [id, mention] in existing_ids.get_extIds(): await ctx.send("Cannot submit more than once! " + str(mention))
+    if [id, mention] in existing_ids.get_extUser(): await ctx.send("Cannot submit more than once! " + str(mention))
     else:
         try:
             url = ctx.message.attachments[0].url            # check for an image, call exception if none found
@@ -128,7 +128,7 @@ async def start(ctx, time):
     currentProgress.set_progress(False);
     await ctx.send("Time is up!")
     # compare all the images with ai probability. The highest probability wins
-    users = existing_ids.get_extIds()
+    users = existing_ids.get_extUser()
     for i in range(len(users)):
         id = users[i][0]
         mention = users[i][1]
@@ -136,11 +136,9 @@ async def start(ctx, time):
         print(ret)
         label = ret[0]
         prob = ret[1]
-        user = get(bot.get_all_members(), id=id)
-        print(user)
         probability = prob*100
-        strProb =  ": Your drawing is {probability: .2f}% paper_clip".format(probability=probability)
-        await ctx.send(strProb)
+        strProb = ": Your drawing is {probability: .2f}% {label}".format(probability=probability, label=label)
+        await ctx.send(mention + strProb)
     # clear directory
     existing_ids.set_extId([])
 
