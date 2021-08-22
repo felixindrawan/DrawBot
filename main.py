@@ -13,8 +13,14 @@ load_dotenv()
 TOKEN = os.getenv('TOKEN')
 GUILD = os.getenv('GUILD')
 
-PROMPTS = ["CAT", "DOG", "CLOCK"]
-IN_PROGRESS = False
+# get prompts
+def readFile(fileName):
+    fileObj = open(fileName, "r")  # opens the file in read mode
+    words = fileObj.read().splitlines()  # puts the file into an array
+    fileObj.close()
+    return words
+
+PROMPTS = readFile('categories.txt')
 
 bot = commands.Bot(command_prefix='.')
 
