@@ -1,60 +1,62 @@
 # bot.py
 import os
+import asyncio
 import random
-import discord
+from discord.ext import commands
+import uuid
+import requests
+import shutil
+# import the ai algorithm
 from dotenv import load_dotenv
 load_dotenv()
+
 TOKEN = os.getenv('TOKEN')
 GUILD = os.getenv('GUILD')
 
-intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+PROMPTS = ["CAT", "DOG", "CLOCK"]
+IN_PROGRESS = False
 
-# @client.event
-# async def on_ready():
-#     print(f'{client.user} has connected to Discord!')
+bot = commands.Bot(command_prefix='.')
 
-@client.event
+@bot.event
 async def on_ready():
-    # for guild in client.guilds:
-    #     if guild.name == GUILD:
-    #         break
-    guild = discord.utils.get(client.guilds, name=GUILD)
+    print(f'{bot.user.name} connected!')
 
-    print(
-        f'{client.user} is connected to the following guild:\n'
-        f'{guild.name}(id: {guild.id})\n'
-    )
-
-    members = '\n - '.join([member.name for member in guild.members])
-    print(f'Guild Members:\n - {members}')
-    # print(guild.members)
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    brooklyn_99_quotes = [
-        'I\'m the human form of the 💯 emoji.',
-        'Bingpot!',
-        (
-            'Cool. Cool cool cool cool cool cool cool, '
-            'no doubt no doubt no doubt no doubt.'
-        ),
-    ]
-
-    if message.content == '99!':
-        response = random.choice(brooklyn_99_quotes)
-        await message.channel.send(response)
-
-@client.event
-async def on_error(event, *args, **kwargs):
-    with open('err.log', 'a') as f:
-        if event == 'on_message':
-            f.write(f'Unhandled message: {args[0]}\n')
+existing_ids = [] # TODO i dont think this logic actually works
+@bot.command(name='submit', pass_context=True, help='Submit drawing image!')
+async def submit(ctx):
+    id = ctx.message.author.id
+    mention = ctx.message.author.mention
+    if id in existing_ids: await ctx.send("Cannot submit more than once! " + str(mention))
+    # elif IN_PROGRESS==False: await ctx.send("Game hasn't started, not submitted. " + str(mention))
+    else:
+        existing_ids.append(id)
+        try:
+            url = ctx.message.attachments[0].url            # check for an image, call exception if none found
+        except IndexError:
+            print("Error: No attachments")
+            await ctx.send("No attachments detected!")
         else:
-            raise
+            if url[0:26] == "https://cdn.discordapp.com":   # look to see if url is from discord
+                r = requests.get(url, stream=True)
+                # imageName = str(uuid.uuid4()) + '.jpg'      # uuid creates random unique id to use for image names
+                imageName = str(id) + '.jpg'
+                with open(imageName, 'wb') as out_file:
+                    print('Saving image: ' + imageName)
+                    shutil.copyfileobj(r.raw, out_file)     # save image (goes to project directory)  TODO save images to designated directory with their username!
+                await ctx.send('Submitted by '+ str(mention) + ' !')
+
+@bot.command(name='start', help='Starts a random prompt for drawing. Use: .start <time in seconds for challenge')
+async def start(ctx, time):
+    prompt = random.choice(PROMPTS)
+    await ctx.send("The prompt is: "+ prompt)
+    await asyncio.sleep(int(time))
+    await ctx.send("Time is up!")
+    
+    # compare all the images with ai probability. The highest probability wins
+     
+    # clear directory
+    existing_ids = []
 
 
-client.run(TOKEN)
+bot.run(TOKEN)
